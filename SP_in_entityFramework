@@ -1,4 +1,6 @@
                 var sqlParams = new SqlParameter[] {
+                  //                    new SqlParameter("p1", valOfP1),
+  //new SqlParameter("p2", valOfP2),
                   new SqlParameter("outparam", SqlDbType.NVarChar,500)
                   {
                     Direction = System.Data.ParameterDirection.Output
