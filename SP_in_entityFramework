@@ -1,0 +1,16 @@
+                var sqlParams = new SqlParameter[] {
+                  new SqlParameter("outparam", SqlDbType.NVarChar,500)
+                  {
+                    Direction = System.Data.ParameterDirection.Output
+                  }
+                };
+
+                var sql = "usp_GetUser " + String.Join(", ", sqlParams.Select(x =>
+                $"@{x.ParameterName} = @{x.ParameterName}" +
+                (x.Direction == ParameterDirection.Output ? " OUT" : "")
+              ));
+
+                dbContext.Database.ExecuteSqlRaw(sql, sqlParams);
+
+                string output = (string)(sqlParams.First(p => p.Direction == ParameterDirection.Output).Value);
+                return Ok(output);
