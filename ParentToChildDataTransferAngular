@@ -1,0 +1,29 @@
+/// In the parent component template, bind a value to the child component's Input property using property binding [property]="value".
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-parent',
+  template: `
+    <app-child [receivedData]="data"></app-child>
+  `
+})
+export class ParentComponent {
+  data = 'Hello from parent!';
+}
+
+
+
+///In the child component, create an Input property using the @Input decorator. This property will receive data from the parent component.
+
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-child',
+  template: `
+    <p>Received data: {{ receivedData }}</p>
+  `
+})
+export class ChildComponent {
+  @Input() receivedData: string;
+}
