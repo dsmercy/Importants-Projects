@@ -1,0 +1,78 @@
+//ng generate service data-sharing
+
+/// add following code in service
+
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataSharingService {
+  private dataMap: Map<string, any> = new Map<string, any>();
+
+  setData(key: string, data: any): void {
+    this.dataMap.set(key, data);
+  }
+
+  getData(key: string): any {
+    return this.dataMap.get(key);
+  }
+
+  removeData(key: string): void {
+    this.dataMap.delete(key);
+  }
+
+  clearData(): void {
+    this.dataMap.clear();
+  }
+}
+
+/// Component to send data
+
+import { Component } from '@angular/core';
+import { DataSharingService } from './data-sharing.service';
+
+@Component({
+  selector: 'app-component1',
+  template: `
+    <button (click)="sendData()">Send Data</button>
+  `
+})
+export class Component1 {
+  constructor(private dataSharingService: DataSharingService) {}
+
+  sendData(): void {
+    const key = 'myData';
+    const data = 'Hello from Component 1!';
+    this.dataSharingService.setData(key, data);
+  }
+}
+
+/// Component to recieve data
+
+import { Component } from '@angular/core';
+import { DataSharingService } from './data-sharing.service';
+
+@Component({
+  selector: 'app-component2',
+  template: `
+    <div>{{ receivedData }}</div>
+    <button (click)="clearData()">Clear Data</button>
+  `
+})
+export class Component2 {
+  receivedData: any;
+
+  constructor(private dataSharingService: DataSharingService) {}
+
+  ngOnInit(): void {
+    const key = 'myData';
+    this.receivedData = this.dataSharingService.getData(key);
+  }
+
+  clearData(): void {
+    const key = 'myData';
+    this.dataSharingService.removeData(key);
+    this.receivedData = null;
+  }
+}
