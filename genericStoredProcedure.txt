@@ -1,0 +1,95 @@
+select * from ProjectFiles
+
+usp_ProjectFiles '0cd37dc2-6280-4aee-81d0-a2e384955397','GETBYID'
+
+ALTER PROCEDURE [dbo].[usp_ProjectFiles] @Id NVARCHAR(255)	
+	,@Action NVARCHAR(255)='',
+	@ProjectId NVARCHAR(255)=''
+	,@UnitId NVARCHAR(255)=''
+	,@FolderName NVARCHAR(255)=''
+	,@FileName NVARCHAR(MAX)=''
+	,@FilePath NVARCHAR(MAX)=''
+	,@UserName NVARCHAR(255)=''
+	,@CreatedDate NVARCHAR(255)=''
+	,@UpdatedDate NVARCHAR(255)=''
+	,@IsActive BIT = 1
+AS
+BEGIN
+	BEGIN TRY
+		BEGIN TRANSACTION
+
+		IF @Action = 'INSERT'
+		BEGIN
+			-- Insert operation
+			INSERT INTO ProjectFiles (
+				Id
+				,ProjectId
+				,UnitId
+				,FolderName
+				,FileName
+				,FilePath
+				,UserName
+				,CreatedDate
+				,IsActive
+				)
+			VALUES (
+				@Id
+				,@ProjectId
+				,@UnitId
+				,@FolderName
+				,@FileName
+				,@FilePath
+				,@UserName
+				,@CreatedDate
+				,@IsActive
+				);
+		END
+		ELSE IF @Action = 'UPDATE'
+		BEGIN
+			-- Update operation
+			UPDATE ProjectFiles
+			SET ProjectId = ISNULL(NULLIF(@ProjectId, ''), ProjectId)
+				,UnitId = ISNULL(NULLIF(@UnitId, ''), UnitId)
+				,UserName = ISNULL(NULLIF(@UserName, ''), UserName)
+				,UpdatedDate = ISNULL(NULLIF(@UpdatedDate, ''), UpdatedDate)
+			WHERE FilePath = @FilePath;
+		END
+		ELSE IF @Action = 'DELETE'
+		BEGIN
+			-- Delete operation
+			DELETE
+			FROM ProjectFiles
+			WHERE Id = @Id;
+		END
+		ELSE IF @Action = 'GETBYID'
+		BEGIN
+			-- GETBYID operation
+			SELECT *
+			FROM ProjectFiles
+			WHERE Id = @Id;
+		END
+		ELSE
+		BEGIN
+			-- select operation
+			SELECT *
+			FROM ProjectFiles;
+		END
+
+		COMMIT TRANSACTION;
+	END TRY
+
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRAN --RollBack in case of Error
+
+		DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE()
+		DECLARE @ErrorSeverity INT = ERROR_SEVERITY()
+		DECLARE @ErrorState INT = ERROR_STATE()
+
+		RAISERROR (
+				@ErrorMessage
+				,@ErrorSeverity
+				,@ErrorState
+				);
+	END CATCH
+END;
