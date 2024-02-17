@@ -1,0 +1,65 @@
+chmod 400 ecom-cluster-kubeconfig.yaml
+export KUBECONFIG=ecom-cluster-kubeconfig.yaml
+kubectl cluster-info
+Kubernetes control plane is running at https://8adb9b22-10ea-4344-817e-7786eda07fc9.ap-west-2.linodelke.net:443
+KubeDNS is running at https://8adb9b22-10ea-4344-817e-7786eda07fc9.ap-west-2.linodelke.net:443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+
+
+
+///Create service account for gitlab
+
+1. kubectl create namespace development
+
+2.Create Role
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitlabrole
+  namespace: development
+  uid: 96d2da00-167e-48f1-816a-430dad7e6cab
+  resourceVersion: '33246'
+  creationTimestamp: '2024-02-16T18:39:55Z'
+  labels:
+    k8slens-edit-resource-version: v1
+  selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/development/roles/gitlabrole
+rules:
+  - verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+    apiGroups:
+      - ''
+    resources:
+      - pods
+      - deployments
+      - secrets
+      - services
+---
+
+3.Create Service Account
+
+kubectl create serviceaccount gitlabaccount --namespace=development
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlabaccount
+  namespace: development
+  uid: c19ab494-96d7-4655-9302-98d75d7f4e40
+  resourceVersion: '32687'
+  creationTimestamp: '2024-02-17T12:12:39Z'
+  selfLink: /api/v1/namespaces/development/serviceaccounts/gitlabaccount
+
+4. role binding
+kubectl create rolebinding gitlab-rb --role=gitlabrole --serviceaccount=development:gitlabaccount --namespace=development
+
+
+
+///Create secret for serviceaccount if not present
+kubectl create secret generic gitlabaccount-secret --from-literal=token=$(kubectl get serviceaccount gitlabaccount -n development -o jsonpath='{.secrets[0].name}' | xargs kubectl get secret -n development -o jsonpath='{.data.token}' | base64 -d) --namespace=development
