@@ -59,6 +59,19 @@ metadata:
 4. role binding
 kubectl create rolebinding gitlab-rb --role=gitlabrole --serviceaccount=development:gitlabaccount --namespace=development
 
+///Create secret for serviceaccount if not present
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitlabaccount-secret
+  namespace: development
+  annotations:
+    kubernetes.io/service-account.name: gitlabaccount
+type: kubernetes.io/service-account-token
+EOF
+
 
 
 ///Create secret for serviceaccount if not present
